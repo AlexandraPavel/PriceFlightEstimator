@@ -6,8 +6,8 @@ from msedge.selenium_tools import Edge, EdgeOptions
 # Set up Edge options
 edge_options = EdgeOptions()
 edge_options.add_argument('--disable-notifications')
-#edge_options.use_chromium = True  # Use the Chromium version of Edge
-#edge_options.add_argument('--headless')  # Run Edge in headless mode (no GUI)
+edge_options.use_chromium = True  # Use the Chromium version of Edge
+edge_options.add_argument('--headless')  # Run Edge in headless mode (no GUI)
 
 # Path to your Microsoft Edge WebDriver executable
 edge_driver_path = 'C:/Users/Mircea Timpuriu/Desktop/Facultate/MA1S1/DS/msedgedriver.exe'
@@ -19,7 +19,7 @@ driver = Edge(executable_path=edge_driver_path, options=edge_options)
 locations = ["Bucuresti", "Cluj", "Iasi", "Timisoara", "Sibiu", "Istanbul", "Londra", "Paris", "Amsterdam", "Madrid", "Frankfurt", "Barcelona", "Munich", "Roma", "Lisabona", "Dublin", "Viena", "Manchester", "Atena", "Zurich", "Oslo", "Copenhaga", "Milano", "Berlin", "Bruxelles", "Malaga", "Stockholm", "Varsovia", "Geneva", "Alicante", "Helsinki", "Porto", "Budapesta", "Nisa", "Hamburg"]
 locations_abbr = ["BUH", "CLJ", "IAS", "TSR", "SBZ", "IST", "LON", "PAR", "AMS", "MAD", "FRA", "BCN", "MUC", "ROM", "LIS", "DUB", "VIE", "MAN", "ATH", "ZRH", "OSL", "CPH", "MIL", "BER", "BRU", "AGP", "STO", "WAW", "GVA", "ALC", "HEL", "OPO", "BUD", "NCE", "HAM"]
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
 from datetime import date, timedelta, datetime
 import time
 import pandas as pd
@@ -63,12 +63,13 @@ from selenium.common.exceptions import TimeoutException
 flight_db = pd.DataFrame(columns = ['date_of_enquiry', 'departure', 'destination', 'flight_date', 'flight_time', 'arrival_time', 'airline', 'layovers', 'flight_duration', 'price'])
 
 # Set the number and range of departure locations
-for i in range(1):
+for i in range(3):
     # Set the number and range of destinations
     for j in range(5, 25):
         try:
             if i != j:
                 print(locations[i] + " -> " + locations[j])
+                counter = 0
                 # Extract all URLs for a way
                 url_list = []
                 for dat in dl1:
@@ -83,13 +84,23 @@ for i in range(1):
                     url = "http://vola.ro/flight_search/from/" + locations[j] + "/to/" + locations[i] + "/from_code/" + locations_abbr[j] + "/to_code/" + locations_abbr[i] + "/dd/" + str(dat) + "/rd/2023-12-08/ad/1/ow/1"
                     url_list.append((url, dat, 1))
                 for elem in url_list:
+                    counter += 1
+                    print(counter)
                     (url, dat, return_flight) = elem    
                     driver.get(url)
                     full_price_list = []
                     full_stop_list = []
                     full_hour_list = []
                     # Wait until all dynamic elements are shown in this page
-                    WebDriverWait(driver, 10000).until(EC.presence_of_element_located((By.XPATH, "//ith-filter-categories[contains(@filters, '$ctrl.filters')]")))
+                    while True:
+                        try:
+                            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//ith-filter-categories[contains(@filters, '$ctrl.filters')]")))
+                            if i == 0 and j == 5 and elem == url_list[0]:
+                                button = driver.find_element(By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll")
+                                button.click();
+                            break
+                        except TimeoutException as e:
+                            driver.refresh()
                     for k in range(1):
                         try:
                             # Find all the relevant details
@@ -108,7 +119,7 @@ for i in range(1):
                             print(e)
                             pass
                     # Set the number of flights to be extracted for a way in at a specific date (max 30)
-                    for l in range(30):
+                    for l in range(20):
                         try:
                             # Calculate the total flight time
                             tmp = full_stop_list[l].split(",")[0]
@@ -145,7 +156,7 @@ for i in range(1):
                             print("Nu e bine")
         except StaleElementReferenceException as e:
             print("Aia e")  
-            pass      
+            pass
 driver.quit()
 # Drop eventual duplicates and export to csv (name of the file is based on the date of the extraction)
 # If you try to scrape more than once in a day, it WILL be overwritten
