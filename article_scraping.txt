@@ -1,0 +1,6 @@
+How AI in Visual Testing is transforming the Testing Landscape | BrowserStack
+The following are all instances of your keyword:
+1.Globally distributed data centers
+2.Computer vision involves training a machine to process visual information in a way similar to human sight. Human sight involves using retinas, optic nerves, and the visual cortex to give context to images, such as whether a car is moving or not. Computer vision utilizes cameras, data, and algorithms to carry out the same function but in a more efficient manner. A machine can be trained to analyze thousands of images in a second in a more accurate manner than human vision.
+3.An example to illustrate the use of such classification algorithms would be Optical Character Recognition (OCR). OCR is a computer vision task that is widely used in our everyday lives. OCR carries out text recognition, and it is commonly used in order to digitize paper-based documents and make them machine-readable so that further analysis/work can be easily carried out. For example, Medical notes and reports can be digitized so that patient data can be easily extracted for further analysis of disease rates.
+There were 3 matches found for the keyword.
